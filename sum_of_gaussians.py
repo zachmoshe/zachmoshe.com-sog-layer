@@ -89,7 +89,7 @@ class SumOfGaussians(tf.keras.layers.Layer):
     def call(self, inputs, **kwargs):
         del kwargs  # unused.
         per_gaussian_output = [
-            calculate_multivariate_gaussian(input, self.amps[i], self.means[i], self._get_sigma(i))
+            calculate_multivariate_gaussian(inputs, self.amps[i], self.means[i], self._get_sigma(i))
             for i in range(self.num_gaussians)]
         result = tf.reduce_sum(tf.stack(per_gaussian_output, axis=-1), axis=-1, keepdims=True)
         return result
