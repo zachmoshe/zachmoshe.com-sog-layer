@@ -23,7 +23,7 @@ def calculate_multivariate_gaussian(positions, amp, mu, sigma):
     return tf.reshape(flatten_result, tf.shape(positions)[:-1])
 
 
-def _calculate_means_spread_regularizer(means, eps=1e-9):
+def _means_spread_regularizer(means, eps=1e-9):
     num_means = means.shape[0]
 
     means_pairwise_distances = tf.norm(tf.expand_dims(means, 0) - tf.expand_dims(means, 1) + eps, axis=-1)
@@ -47,12 +47,15 @@ def _pseudo_sigma_to_sigma(pseudo_sigma):
 
 class SumOfGaussians(tf.keras.layers.Layer):
     """Assumes data is a sum of multiple Gaussians and learns the means, covariances and amplitudes."""
-    def __init__(self, num_gaussians, amps_l1_reg=1e-3,
+    def __init__(self, num_gaussians, amps_l1_reg=1e-3, use_means_spread_regularizer=True,
                  centers_min=0., centers_max=1.,
                  **kwargs):
         super(SumOfGaussians, self).__init__(**kwargs)
         self.num_gaussians = num_gaussians
         self.amps_regularizer = tf.keras.regularizers.l1(amps_l1_reg)
+        self.centers_regularizer = (_means_spread_regularizer
+                                    if use_means_spread_regularizer
+                                    else None)
 
         self.centers_min = np.array(centers_min)
         self.centers_max = np.array(centers_max)
@@ -68,7 +71,7 @@ class SumOfGaussians(tf.keras.layers.Layer):
         self.means = self.add_weight(
             'means', shape=(self.num_gaussians, self.dim), dtype=tf.float32,
             initializer=self.centers_initializer,
-            regularizer=_calculate_means_spread_regularizer)
+            regularizer=self.centers_regularizer)
 
         self.covs_proxy = self.add_weight(
             'covs', shape=(self.num_gaussians, self.dim, self.dim), dtype=tf.float32,
