@@ -73,8 +73,8 @@ class SumOfGaussians(tf.keras.layers.Layer):
             initializer=self.centers_initializer,
             regularizer=self.centers_regularizer)
 
-        self.covs_proxy = self.add_weight(
-            'covs', shape=(self.num_gaussians, self.dim, self.dim), dtype=tf.float32,
+        self.pseudo_proxies = self.add_weight(
+            'pseudo_proxies', shape=(self.num_gaussians, self.dim, self.dim), dtype=tf.float32,
             initializer=_multiple_identity_matrices_initializer)
 
         self.amps = self.add_weight(
@@ -84,7 +84,7 @@ class SumOfGaussians(tf.keras.layers.Layer):
             constraint=tf.keras.constraints.NonNeg())
 
     def _get_sigma(self, i):
-        return _pseudo_sigma_to_sigma(self.covs_proxy[i])
+        return _pseudo_sigma_to_sigma(self.pseudo_proxies[i])
 
     def get_current_amps_regularizer_value(self):
         return self.amps_regularizer(self.amps)
