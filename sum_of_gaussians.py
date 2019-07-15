@@ -48,11 +48,14 @@ def _pseudo_sigma_to_sigma(pseudo_sigma):
 class SumOfGaussians(tf.keras.layers.Layer):
     """Assumes data is a sum of multiple Gaussians and learns the means, covariances and amplitudes."""
     def __init__(self, num_gaussians, amps_l1_reg=1e-3, use_means_spread_regularizer=True,
-                 centers_min=0., centers_max=1.,
+                 force_amps_nonneg=True, centers_min=0., centers_max=1.,
                  **kwargs):
         super(SumOfGaussians, self).__init__(**kwargs)
         self.num_gaussians = num_gaussians
         self.amps_regularizer = tf.keras.regularizers.l1(amps_l1_reg)
+        self.amps_constraint = (tf.keras.constraints.NonNeg()
+                                if force_amps_nonneg
+                                else None)
         self.centers_regularizer = (_means_spread_regularizer
                                     if use_means_spread_regularizer
                                     else None)
@@ -81,7 +84,7 @@ class SumOfGaussians(tf.keras.layers.Layer):
             'amps', shape=(self.num_gaussians,), dtype=tf.float32,
             initializer=tf.keras.initializers.Ones(),
             regularizer=self.amps_regularizer,
-            constraint=tf.keras.constraints.NonNeg())
+            constraint=self.amps_contraint)
 
     def _get_sigma(self, i):
         return _pseudo_sigma_to_sigma(self.pseudo_proxies[i])
