@@ -84,7 +84,7 @@ class SumOfGaussians(tf.keras.layers.Layer):
             'amps', shape=(self.num_gaussians,), dtype=tf.float32,
             initializer=tf.keras.initializers.Ones(),
             regularizer=self.amps_regularizer,
-            constraint=self.amps_contraint)
+            constraint=self.amps_constraint)
 
     def _get_sigma(self, i):
         return _pseudo_sigma_to_sigma(self.pseudo_proxies[i])
