@@ -40,9 +40,15 @@ def _multiple_identity_matrices_initializer(shape, dtype=None):
     return np.stack([np.identity(shape[1]) for _ in range(shape[0])])
 
 
+@tf.function()
 def _pseudo_sigma_to_sigma(pseudo_sigma):
     pseudo_sigma = tf.linalg.band_part(pseudo_sigma, 0, -1)  # take only upper half.
-    return pseudo_sigma @ tf.transpose(pseudo_sigma)
+    sigma = pseudo_sigma @ tf.transpose(pseudo_sigma)
+
+    # make sure it's non singular
+    sigma += tf.cast(tf.identity(sigma.shape[0]), sigma.dtype) * 1e-6
+
+    return sigma
 
 
 class SumOfGaussians(tf.keras.layers.Layer):
