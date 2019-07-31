@@ -1,3 +1,6 @@
+# For a more detailed explanation on the SumOfGaussian model, please
+# refer to: http://zachmoshe.com
+
 import tensorflow as tf
 import numpy as np
 
@@ -24,6 +27,7 @@ def calculate_multivariate_gaussian(positions, amp, mu, sigma):
 
 
 def _means_spread_regularizer(means, eps=1e-9):
+    """Defines a loss term that penalize for two centers that are close to each other."""
     num_means = means.shape[0]
 
     means_pairwise_distances = tf.norm(tf.expand_dims(means, 0) - tf.expand_dims(means, 1) + eps, axis=-1)
@@ -35,6 +39,7 @@ def _means_spread_regularizer(means, eps=1e-9):
 
 
 def _multiple_identity_matrices_initializer(shape, dtype=None):
+    """Initialize a stacked tensor of multiple identity matrices."""
     del dtype  # unused.
     assert len(shape) == 3 and shape[1] == shape[2], 'shape must be (N, D, D)'
     return np.stack([np.identity(shape[1]) for _ in range(shape[0])])
@@ -42,6 +47,7 @@ def _multiple_identity_matrices_initializer(shape, dtype=None):
 
 @tf.function()
 def _pseudo_sigma_to_sigma(pseudo_sigma):
+    """Returns a legal non-singular covariance matrix from a "pseudo_sigma" tensor."""
     pseudo_sigma = tf.linalg.band_part(pseudo_sigma, 0, -1)  # take only upper half.
     sigma = pseudo_sigma @ tf.transpose(pseudo_sigma)
 
