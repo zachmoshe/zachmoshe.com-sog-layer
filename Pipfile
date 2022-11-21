@@ -8,7 +8,7 @@ verify_ssl = true
 [packages]
 numpy = "*"
 pandas = "*"
-tensorflow-gpu = {version = "==2.0.0-beta0", sys_platform = "== 'linux'"} # running on linux = GCE (with GPU).
+tensorflow-gpu = {version = "==2.9.3", sys_platform = "== 'linux'"} # running on linux = GCE (with GPU).
 tensorflow = {version = "==2.0.0-beta1", sys_platform = "== 'darwin'"}  # personal mac.
 
 [requires]
